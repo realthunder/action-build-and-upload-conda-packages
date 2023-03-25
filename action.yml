@@ -98,32 +98,19 @@ runs:
         echo "Trigger event and type: $GITHUB_EVENT_NAME, ${{github.event.action}}"
         echo "Associated commit SHA and tag: $GITHUB_SHA, $GITHUB_REF"
         echo "::endgroup::"
-    - name: Checking if meta.yaml is in meta_yaml_dir
-      id: checking-meta_yaml
-      shell: bash
-      working-directory: ./${{ inputs.meta_yaml_dir }}
-      run: |
-        echo "::group::Checking if the file meta.yaml exists"
-        if [ ! -f meta.yaml ]; then
-           echo "A meta.yaml file with the compilation instructions of the conda package was not found in ${{ inputs.meta_yaml_dir }}."
-           exit 1
-        else
-           echo "A meta.yaml file with the compilation instructions of the conda package was found in ${{ inputs.meta_yaml_dir }}."
-        fi
-        echo "::endgroup::"
     - name: Packages compilation
       id: packages-compilation
       shell: bash -l {0}
-      working-directory: ./${{ inputs.meta_yaml_dir }}
+      working-directory: .
       run: |
         echo "::group::Building conda package for host platform"
         out_dir=`mktemp -d -t compilation-XXXXXXXXXX`
         if "${{ inputs.mambabuild }}"; then
-          echo "conda mambabuild . --no-anaconda-upload --output-folder $out_dir --python ${{ inputs.python-version }}"
-          conda mambabuild . --no-anaconda-upload --output-folder $out_dir --python ${{ inputs.python-version }}
+          echo "conda mambabuild --no-anaconda-upload --output-folder $out_dir --python ${{ inputs.python-version }} ${{ inputs.meta_yaml_dir }}"
+          conda mambabuild --no-anaconda-upload --output-folder $out_dir --python ${{ inputs.python-version }} ${{ inputs.meta_yaml_dir }}
         else
-          echo "conda build . --no-anaconda-upload --output-folder $out_dir --python ${{ inputs.python-version }}"
-          conda build . --no-anaconda-upload --output-folder $out_dir --python ${{ inputs.python-version }}
+          echo "conda build --no-anaconda-upload --output-folder $out_dir --python ${{ inputs.python-version }} ${{ inputs.meta_yaml_dir }}"
+          conda build --no-anaconda-upload --output-folder $out_dir --python ${{ inputs.python-version }} ${{ inputs.meta_yaml_dir }}
         fi
         for dirname in $out_dir/*; do
           if [ -d "$dirname" ]; then
@@ -212,7 +199,7 @@ runs:
     - name: Packages uploading
       id: packages-uploading
       shell: bash -l {0}
-      working-directory: ./${{ inputs.meta_yaml_dir }}
+      working-directory: .
       run: |
         echo "::group::Conda packages uploading"
         #cd ${{ steps.packages-compilation.outputs.out_dir }}
