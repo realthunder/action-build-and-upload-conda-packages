@@ -210,12 +210,15 @@ runs:
         fi
         if [ "$label" == "auto" ]; then
           if [ "${{github.event.action}}" == "released" ]; then
-             label="main"
+             label=main
           elif [ "${{github.event.action}}" == "prereleased" ]; then
-             label="dev"
+             label=dev
+          elif ${{ endsWith(github.ref, 'tip') }}; then
+             label=tip
+          elif ${{ endsWith(github.ref, 'edge') }}; then
+             label=edge
           else
-             echo "The trigger type ${{github.event.action}} is not compatible with `label: auto`"
-             exit 1
+             label=test
           fi
         fi
         export ANACONDA_API_TOKEN=${{ inputs.token }}
