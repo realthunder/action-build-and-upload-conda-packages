@@ -221,6 +221,8 @@ runs:
         force=""
         if "${{ inputs.overwrite }}"; then
           force="--force"
+        else
+          force="--skip"
         fi
         if [ "$label" == "auto" ]; then
           if [ "${{github.event.action}}" == "released" ]; then
