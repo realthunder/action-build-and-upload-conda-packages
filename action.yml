@@ -10,7 +10,8 @@ inputs:
     required: true
   python-version:
     description: Python version of the package to be built.
-    required: true
+    required: false
+    default: ''
   mambabuild:
     description: Using boa (mambabuild) to build the packages.
     required: false
@@ -109,17 +110,22 @@ runs:
       run: |
         echo "::group::Building conda package for host platform"
         out_dir=`mktemp -d -t compilation-XXXXXXXXXX`
-        dbg=
+        cmd="--no-anaconda-upload --output-folder $out_dir"
         if ${{ inputs.debug }}; then
-            dbg="--debug"
+            cmd="$cmd --debug"
         fi
+        if test "${{ inputs.python-version }}"; then
+          cmd="$cmd --python ${{ inputs.python-version }}"
+        fi
+        cmd="$cmd ${{ inputs.meta_yaml_dir }}"
         if "${{ inputs.mambabuild }}"; then
-          echo "conda mambabuild --no-anaconda-upload --output-folder $out_dir --python ${{ inputs.python-version }} ${{ inputs.meta_yaml_dir }}"
-          conda mambabuild $dbg --no-anaconda-upload --output-folder $out_dir --python ${{ inputs.python-version }} ${{ inputs.meta_yaml_dir }}
+          cmd="conda mambabuild $cmd"
         else
-          echo "conda build --no-anaconda-upload --output-folder $out_dir --python ${{ inputs.python-version }} ${{ inputs.meta_yaml_dir }}"
-          conda build $dbg --no-anaconda-upload --output-folder $out_dir --python ${{ inputs.python-version }} ${{ inputs.meta_yaml_dir }}
+          cmd="conda build $cmd"
         fi
+        echo $cmd
+        $cmd
+
         for dirname in $out_dir/*; do
           if [ -d "$dirname" ]; then
             for filename in $dirname/*; do
