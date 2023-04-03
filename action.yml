@@ -12,6 +12,14 @@ inputs:
     description: Python version of the package to be built.
     required: false
     default: ''
+  variants:
+    description: Conda build variants
+    required: false
+    default: ''
+  variant_conf:
+    description: Conda build variants config file
+    required: false
+    default: ''
   mambabuild:
     description: Using boa (mambabuild) to build the packages.
     required: false
@@ -117,15 +125,22 @@ runs:
         if test "${{ inputs.python-version }}"; then
           cmd="$cmd --python ${{ inputs.python-version }}"
         fi
-        cmd="$cmd ${{ inputs.meta_yaml_dir }}"
         if "${{ inputs.mambabuild }}"; then
           cmd="conda mambabuild $cmd"
         else
           cmd="conda build $cmd"
         fi
-        echo $cmd
-        $cmd
-
+        if test ${{ inputs.variant_conf }}; then
+          cmd="$cmd -m ${{ inputs.variant_conf }}"
+        fi
+        cmd="$cmd ${{ inputs.meta_yaml_dir }}"
+        if test "${{ inputs.variants }}"; then
+          echo $cmd --variants "${{ inputs.variants }}"
+          $cmd --variants "${{ inputs.variants }}"
+        else
+          echo $cmd
+          $cmd
+        fi
         for dirname in $out_dir/*; do
           if [ -d "$dirname" ]; then
             for filename in $dirname/*; do
