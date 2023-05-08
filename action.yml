@@ -223,7 +223,7 @@ runs:
           rm $HOST_PACKAGE
           echo "Package for host platform removed"
         fi
-        echo "::set-output name=out_dir::'$out_dir'"
+        echo "name=out_dir::'$out_dir'" >> "$GITHUB_OUTPUT"
         echo "::endgroup::"
     - name: Packages uploading
       id: packages-uploading
