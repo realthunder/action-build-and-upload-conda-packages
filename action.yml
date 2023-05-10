@@ -99,6 +99,10 @@ inputs:
     description: Enable conda build debug output.
     required: false
     default: false
+  artifacts_name:
+    description: Github artifacts name to be uploaded.
+    required: false
+    default: ''
  
 runs:
   using: "composite"
@@ -225,6 +229,15 @@ runs:
         fi
         echo "name=out_dir::'$out_dir'" >> "$GITHUB_OUTPUT"
         echo "::endgroup::"
+
+    - name: Upload artifacts
+      id: artifacts-upload
+      if: ${{ inputs.artifacts_name != '' }}
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ inputs.artifacts_name }}
+        path: ${{ steps.packages-compilation.outputs.out_dir }}/*/*.tar.bz2
+
     - name: Packages uploading
       id: packages-uploading
       shell: bash -l {0}
