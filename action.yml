@@ -240,7 +240,7 @@ runs:
 
     - name: Packages uploading
       id: packages-uploading
-      shell: bash -l {0}
+      shell: bash -xl {0}
       working-directory: .
       run: |
         echo "::group::Conda packages uploading"
