@@ -227,7 +227,7 @@ runs:
           rm $HOST_PACKAGE
           echo "Package for host platform removed"
         fi
-        echo "name=out_dir::'$out_dir'" >> "$GITHUB_OUTPUT"
+        echo "out_dir='$out_dir'" >> "$GITHUB_OUTPUT"
         echo "::endgroup::"
 
     - name: Upload artifacts
