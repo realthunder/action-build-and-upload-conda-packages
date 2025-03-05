@@ -233,7 +233,7 @@ runs:
     - name: Upload artifacts
       id: artifacts-upload
       if: ${{ inputs.artifacts_name != '' }}
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ inputs.artifacts_name }}
         path: ${{ steps.packages-compilation.outputs.out_dir }}/*/*.tar.bz2
